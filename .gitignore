@@ -1,0 +1,4 @@
+.ccls-cache/*
+.vscode/*
+object_files/*
+output
