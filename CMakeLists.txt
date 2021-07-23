@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 3.10)
 
 project(rocket_modeling)
@@ -23,6 +24,7 @@ if (UNIX)
         add_executable(rocket  ${SRC}/main.cpp ${SRC}/shader.cpp ${INCLUDES}/glad/src/glad.c ${COMMON_GLFW} ${X11_GLFW})
 	target_link_libraries(rocket pthread dl X11 m)
 	set (CMAKE_CXX_FLAGS "-D_GLFW_X11")
+	add_compile_definitions(_GLFW_X11)
 endif (UNIX)
 
 
