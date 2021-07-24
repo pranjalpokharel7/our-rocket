@@ -1,0 +1,115 @@
+// Single header simple matrix library like vector
+#include "vec.hpp"
+#include <type_traits>
+#include <cmath>
+// We will only be implementing 4x4 matrix for now .. and that's all we need
+
+namespace FMath
+{
+  template <typename T, typename = std::enable_if_t<std::is_integral_v<T> ||
+						    std::is_floating_point_v<T>>>
+  class Mat4
+  {
+    // Opengl uses column major order .. so we will go with that .. Might look opposite but its what OpengL use internally
+    T elements[4][4] = {};
+  public:
+    Mat4() = default;
+    
+    // Pass one to initialize as identifty array 
+    Mat4(T num)
+    {
+      for (int i = 0; i < 4; ++i)
+	elements[i][i] = num;
+    }
+    
+    T* operator[](const unsigned i)
+    {
+      return &elements[i][0];
+    }
+    
+    constexpr Mat4 translate(const Vec3<T>& vec)
+    {
+      Mat4 id{1.0f};
+      id[3][0] = vec.x;
+      id[3][1] = vec.y;
+      id[3][2] = vec.z;
+      return *this * id;
+    }
+
+    constexpr Mat4 rotateX(float angle)
+    {
+      Mat4 id{1.0f};
+      id[1][1] = std::cos(angle);
+      id[1][2] = std::sin(angle);
+      id[2][1] = -id[1][2];
+      id[2][2] = id[1][1];
+      return *this * id;
+    }
+
+    constexpr Mat4 rotateY(float angle)
+    {
+      Mat4 id{1.0f};
+      id[0][0] = std::cos(angle);
+      id[0][2] = -std::sin(angle);
+      id[2][0] = id[0][2];
+      id[2][2] = id[0][0];
+      return *this * id;
+    }
+
+    constexpr Mat4 rotateZ(float angle)
+    {
+      Mat4 id{1.0f};
+      id[0][0] = std::cos(angle);
+      id[0][1] = std::sin(anlge);
+      id[1][0] = -id[0][1];
+      id[1][1] = id[0][0];
+      return *this * id; 
+    }
+
+    Mat4& rotate(const Vec3<T>& vec, float angle)
+    {
+      Mat4 id{1.0f};
+      auto axis = vec.unitVec();
+      const float sin = std::sin(angle), cos = std::cos(angle);
+      id[0][0] = cos + axis.x * axis.x * (1-cos);
+      id[1][1] = cos + axis.y * axis.y * (1-cos);
+      id[2][2] = cos + axis.z * axis.z * (1-cos);
+
+      id[1][0] = axis.x * axis.y * (1-cos) - axis.z;
+      id[2][0] = axis.x * axis.z * (1-cos) + axis.y;
+
+      id[0][1] = axis.y * axis.x * (1-cos) + axis.z * sin;
+      id[2][1] = axis.y * axis.z * (1-cos) - axis.x * sin;
+
+      id[0][2] = axis.z * axis.x * (1-cos) - axis.y * sin;
+      id[1][2] = axis.z * axis.y * (1-cos) + axis.x * sin;
+
+      return *this * id;
+	       
+    }
+
+    Mat4& operator*(const Mat4& mat)
+    {
+      Mat4 result = Mat4(T{});
+      for (int i = 0; i < 4; ++i)
+      {
+	for (int k = 0; k < 4; ++k)
+	{
+	  T sum = T{};
+	  for (int j = 0; j < 4; ++j)
+	    sum += elements[i][k] * mat[k][j];
+	  result[i][k] = sum;
+	}
+	
+      }
+      return *this;
+    }
+
+    T* value_ptr()
+    {
+      return elements;
+    }
+    
+  };
+}
+
