@@ -8,6 +8,9 @@
 
 #include <GLFW/glfw3.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "../include/stb_image.h"
+
 ShaderProgram::ShaderProgram(const std::string_view &vs_path,
                              const std::string_view &fs_path)
 {
@@ -68,8 +71,20 @@ int CompileAndLogShader(const std::string_view& path, GLuint shader_type)
     
 namespace Render
 {
-    Renderer CreateRenderer()
+  void keyCallback(GLFWwindow* window, int key, int , int , int )
+  {
+    if (key == GLFW_KEY_ESCAPE)
+      glfwSetWindowShouldClose(window,GL_TRUE);
+  }
+
+  void onSizeChange(GLFWwindow* window, int width, int height)
+  {
+    glViewport(0,0,width,height);
+  }
+  
+  Renderer CreateRenderer(int width, int height)
     {
+        // Its only for a single window .. It doesn't work for multiple window 
 	if (!glfwInit())
 	{
 	    std::cerr << "Failed to load GLFW API. Exiting \n";
@@ -79,7 +94,7 @@ namespace Render
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(800,800,"Model rendering",nullptr,nullptr);
+	GLFWwindow* window = glfwCreateWindow(width,height,"Model rendering",nullptr,nullptr);
 	if (!window)
 	{
 	    std::cerr << "Failed to create window. Exiting\n" << std::endl;
@@ -87,6 +102,11 @@ namespace Render
 	}
 
 	glfwMakeContextCurrent(window);
+
+	glfwSetKeyCallback(window,keyCallback);
+	glfwSetFramebufferSizeCallback(window,onSizeChange);
+
+	stbi_set_flip_vertically_on_load(true);
 	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 	    // could use optional here but leave it for now
@@ -111,4 +131,28 @@ namespace Render
 	glfwDestroyWindow(render->window);
 	glfwTerminate();
     }
+}
+
+Texture2D::Texture2D(std::string_view path)
+{
+  glGenTextures(1,&texture_id);
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  unsigned char* image_data = stbi_load(path.data(),&width,&height,&no_of_channels,0);
+
+  if (!image_data)
+    std::cerr << "\nFailed to open texture image -> " << path.data() << "\nWell nothing to do much. Can't throw too" << std::endl;
+  
+  auto format = no_of_channels == 3 ? GL_RGB : GL_RGBA;
+  glTexImage2D(GL_TEXTURE_2D,0,format,width,height,0,format,GL_UNSIGNED_BYTE,image_data);
+
+  glGenerateMipmap(GL_TEXTURE_2D);
+
+  // Freeing on nullptr is valid 
+  stbi_image_free(image_data);
 }

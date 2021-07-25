@@ -32,7 +32,22 @@ struct Renderer
 };
 
 namespace Render {
-    Renderer CreateRenderer();
+  Renderer CreateRenderer(int width = 800, int height = 800);
     void DestroyRenderer(Renderer* );
-    }
+    } // namespace Render
+
+// Implement texture class here
+class Texture2D
+{
+public:
+  GLuint texture_id{};
+  GLint no_of_channels;
+  GLint width,height; 
+public:
+  Texture2D(std::string_view path);
+};
+
+    
+  
+    
 #endif
