@@ -1,4 +1,5 @@
 
+
 #ifndef MATRIX4_HPP
 #define MATRIX4_HPP
 // Single header simple matrix library like vector
@@ -29,6 +30,11 @@ namespace FMath
     {
       return &elements[i][0];
     }
+
+    const T* operator[](const unsigned i) const
+    {
+      return &elements[i][0];
+    }
     
     constexpr Mat4 translate(const Vec3<T>& vec)
     {
@@ -54,7 +60,7 @@ namespace FMath
       Mat4 id{1.0f};
       id[0][0] = std::cos(angle);
       id[0][2] = -std::sin(angle);
-      id[2][0] = id[0][2];
+      id[2][0] = -id[0][2];
       id[2][2] = id[0][0];
       return id * *this;
     }
@@ -92,25 +98,27 @@ namespace FMath
 	       
     }
 
-    constexpr Mat4* operator*(const Mat4& mat)
+    constexpr Mat4 operator*(const Mat4& mat) const
     {
       Mat4 result = Mat4(T{});
       for (int i = 0; i < 4; ++i)
       {
-	for (int k = 0; k < 4; ++k)
+	for (int j = 0; j < 4; ++j)
 	{
-	  for (int j = 0; j < 4; ++j)
-	    result[i][j] += elements[i][k] * mat[k][j];
+	  float sum = 0.0f;
+	  for (int k = 0; k < 4; ++k)
+	    sum += elements[i][k] * mat[k][j];
+	  result[i][j] = sum;
 	}
 	
       }
-      result;
+      return result;
     }
 
     Mat4 perspective(float aspect_ratio, float fovy = 45.0f, float near_plane = 0.1f, float far_plane = 10.0f)
     {
       Mat4 id{1.0f}; // Need c++17 conformance compiler
-      float tan_fovy = std::sin(fovy)/std::cos(fovy);
+      float tan_fovy = std::sin(FMath::DegreeToRadians(fovy))/std::cos(FMath::DegreeToRadians(fovy));
       float top = near_plane * tan_fovy;
       float right = aspect_ratio * top;
       
@@ -125,14 +133,15 @@ namespace FMath
     
     T* value_ptr()
     {
-      return elements;
+      return &elements[0][0];
     }
 
   };
 
-  Mat4<float> perspectiveProjection(float aspect_ratio, float fovy = 45.0f, float near_plane = 0.1f, float far_plane = 10.0f)
+  inline Mat4<float> perspectiveProjection(float aspect_ratio, float fovy = 45.0f, float near_plane = 0.1f, float far_plane = 10.0f)
   {
     Mat4 id{1.0f}; // Need c++17 conformance compiler
+    fovy = FMath::DegreeToRadians(fovy);
     float tan_fovy = std::sin(fovy)/std::cos(fovy);
     float top = near_plane * tan_fovy;
     float right = aspect_ratio * top;
@@ -141,13 +150,13 @@ namespace FMath
     id[1][1] = near_plane / top;
     id[2][3] = -1;
     id[3][2] = - 2 * far_plane * near_plane / (far_plane - near_plane);
-    id[2][2] = -(far_plane+near_plane) / (far_plane - near_plane);
+    id[2][2] = -(far_plane + near_plane) / (far_plane - near_plane);
     id[3][3] = 0;
     return id;
   }
 
   template <typename U>
-  std::ostream& operator<<(std::ostream& os, Mat4<U> matrix)
+  inline std::ostream& operator<<(std::ostream& os, Mat4<U> matrix)
   {
     std::cout << "\nOutput in Row major order -> \n";
     for (int i = 0; i < 4; ++i)
@@ -162,7 +171,7 @@ namespace FMath
   }
 
   
-  Mat4<float> lookAtMatrix(const Vec3<float>& cameraPos, const Vec3<float> &target, const Vec3<float>& up)
+ inline  Mat4<float> lookAtMatrix(const Vec3<float>& cameraPos, const Vec3<float> &target, const Vec3<float>& up)
   {
     auto forward_vec = (cameraPos - target).unitVec();
     auto right = FMath::Vec3<float>::cross(up,forward_vec);
