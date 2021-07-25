@@ -7,6 +7,7 @@ set (INCLUDES "./include")
 set (GLAD_INCLUDE "./include/glad/include")
 set (GLFW_INCLUDE  "./GLFW/include")
 set (GLFW "./GLFW/src")
+set (MATHS "./Maths")
 
 
 set (COMMON_GLFW ${GLFW}/context.c ${GLFW}/window.c ${GLFW}/init.c ${GLFW}/input.c ${GLFW}/vulkan.c ${GLFW}/egl_context.c ${GLFW}/osmesa_context.c ${GLFW}/monitor.c)
