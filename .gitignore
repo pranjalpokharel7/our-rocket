@@ -2,3 +2,9 @@
 .vscode/*
 object_files/*
 output
+rocket
+
+CMakeCache.txt
+CMakeFiles/*
+Makefile
+cmake_install.cmake
