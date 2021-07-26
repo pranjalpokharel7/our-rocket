@@ -174,7 +174,7 @@ namespace FMath
  inline  Mat4<float> lookAtMatrix(const Vec3<float>& cameraPos, const Vec3<float> &target, const Vec3<float>& up)
   {
     auto forward_vec = (cameraPos - target).unitVec();
-    auto right = FMath::Vec3<float>::cross(up,forward_vec);
+    auto right = FMath::Vec3<float>::cross(up,forward_vec).unitVec();
 
     auto now_up = FMath::Vec3<float>::cross(forward_vec,right).unitVec();
     Mat4 id{1.0f};

@@ -127,7 +127,7 @@ namespace FMath
 		    vec1.x * vec2.y - vec1.y * vec2.x);
       }
 
-      // Reflection refraaction bla bla could also be implement but not required for openGL .. glsl handles those things
+      // Reflection refraction bla bla could also be implement but not required for openGL .. glsl handles those things
     };
 
     // Implement mulitplication of vector with floating, double and integers
@@ -142,7 +142,7 @@ namespace FMath
     template <typename T, typename U, typename = std::enable_if_t<std::is_integral_v<U> || std::is_floating_point_v<U>>>
     constexpr Vec3<T> operator/(Vec3<T> vec, U num)
     {
-      if (!num)
+      if (num)
 	return Vec3<T>(vec.r / num, vec.g / num, vec.b / num);
       return Vec3<T>(T{},T{},T{});
     }
