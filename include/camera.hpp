@@ -12,12 +12,13 @@
 
 class Camera
 {
+public: 
   // It tracks the camera's location
   FMath::Vec3<float> camera_front; 
   FMath::Vec3<float> camera_pos;
   FMath::Vec3<float> world_up;
 public :
-  Camera() : camera_front{-1.0f,0.0f,0.0f}, camera_pos{}, world_up{-1.0f,0.0f,0.0f} {}
+  Camera() : camera_front{0.0f,0.0f,-1.0f}, camera_pos{}, world_up{-1.0f,0.0f,0.0f} {}
   
   FMath::Mat4<float> ViewMatrix()
   {
