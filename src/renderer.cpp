@@ -11,6 +11,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../include/stb_image.h"
 
+extern void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+
 ShaderProgram::ShaderProgram(const std::string_view &vs_path,
                              const std::string_view &fs_path)
 {
@@ -22,6 +24,7 @@ ShaderProgram::ShaderProgram(const std::string_view &vs_path,
     glAttachShader(shader_program, vertex_shader);
     glAttachShader(shader_program, fragment_shader);
     glLinkProgram(shader_program);
+    
 
     int flag;
     glGetProgramiv(shader_program,GL_LINK_STATUS, &flag);
@@ -105,7 +108,9 @@ namespace Render
 
 	glfwSetKeyCallback(window,keyCallback);
 	glfwSetFramebufferSizeCallback(window,onSizeChange);
-
+	glfwSetScrollCallback(window,scrollCallback);
+	glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+	
 	stbi_set_flip_vertically_on_load(true);
 	if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
