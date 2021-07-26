@@ -177,16 +177,15 @@ void handleEvents(GLFWwindow* window)
   state.last_xpos = xPos;
   state.last_ypos = yPos;
   state.pitch += -delta_yPos * state.angle_constant;
-  state.yaw += delta_xPos * state.angle_constant;
+  state.yaw -= delta_xPos * state.angle_constant;
 
   if (state.pitch > 1.5)
     state.pitch = 1.5;
   else if (state.pitch < -1.5)
     state.pitch = -1.5;
 
-  // This is the rotation around X followed by rotation about Y
-  state.camera.camera_front.x = -std::sin(state.yaw);
-  state.camera.camera_front.y = std::sin(state.pitch) * std::cos(state.yaw);
+  state.camera.camera_front.x = std::sin(state.yaw) * std::cos(state.pitch);
+  state.camera.camera_front.y = std::sin(state.pitch);
   state.camera.camera_front.z = -std::cos(state.pitch) * std::cos(state.yaw);
 
   state.camera.camera_front = state.camera.camera_front.unitVec();
