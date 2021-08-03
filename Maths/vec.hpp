@@ -65,6 +65,20 @@ namespace FMath
 
 namespace FMath
 {
+    template<typename T>
+    class Vec2
+    {
+        public:
+            union
+            {
+                struct { T x; T y;};
+                struct { T a; T b;};
+            };
+        public:
+            Vec2() : x(T{}), y(T{}){};
+            Vec2(T X, T Y) : x(X), y(Y){};
+    };
+
     template <typename T>
     class Vec3
     {

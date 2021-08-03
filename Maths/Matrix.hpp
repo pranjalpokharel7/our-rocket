@@ -76,7 +76,7 @@ namespace FMath
     }
 
     // Generic rotation function .. every angle here are in radians 
-    constexpr Mat4* rotate(const Vec3<T>& vec, float angle)
+    constexpr Mat4 rotate(const Vec3<T>& vec, float angle)
     {
       Mat4 id{1.0f};
       auto axis = vec.unitVec();
