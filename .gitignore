@@ -1,6 +1,7 @@
 .ccls-cache/*
 .vscode/*
 object_files/*
+models/*
 output
 rocket
 

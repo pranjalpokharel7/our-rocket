@@ -16,15 +16,15 @@ set (X11_GLFW  ${GLFW}/posix_thread.c  ${GLFW}/x11_window.c  ${GLFW}/x11_monitor
 
 include_directories(${GLFW_INCLUDE} ${GLAD_INCLUDE}) 
 if(WIN32)
-	add_executable(rocket ${SRC}/main.cpp ${SRC}/renderer.cpp ${INCLUDES}/glad/src/glad.c ${COMMON_GLFW} ${WIN32_GLFW} )
+	add_executable(rocket ${SRC}/main.cpp ${SRC}/renderer.cpp ${SRC}/model.cpp ${SRC}/mesh.cpp ${INCLUDES}/glad/src/glad.c ${COMMON_GLFW} ${WIN32_GLFW} )
 	target_link_libraries(rocket gdi32 kernel32 user32)
 	set (CMAKE_CXX_FLAGS "-std=c++17")
 	add_compile_definitions(_GLFW_WIN32)
 endif (WIN32)
 
 if (UNIX)
-        add_executable(rocket  ${SRC}/main.cpp  ${SRC}/renderer.cpp ${INCLUDES}/glad/src/glad.c ${COMMON_GLFW} ${X11_GLFW})
-	target_link_libraries(rocket pthread dl X11 m)
+        add_executable(rocket  ${SRC}/main.cpp  ${SRC}/renderer.cpp ${SRC}/model.cpp ${SRC}/mesh.cpp ${INCLUDES}/glad/src/glad.c ${COMMON_GLFW} ${X11_GLFW})
+	target_link_libraries(rocket pthread dl X11 m assimp)
 	set (CMAKE_CXX_FLAGS "-std=c++17")
 	add_compile_definitions(_GLFW_X11)
 endif (UNIX)
