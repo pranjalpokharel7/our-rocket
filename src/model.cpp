@@ -92,7 +92,6 @@ Mesh Model::process_mesh(aiMesh *mesh, const aiScene *scene, unsigned int mesh_i
   if (mesh->mMaterialIndex >= 0) {
     // process materials
     aiMaterial *material = scene->mMaterials[scene->mMeshes[mesh_index]->mMaterialIndex];
-    std::cout << "Count before passing in function:" << material->GetTextureCount(aiTextureType_DIFFUSE) << std::endl;
 
     // 1. diffuse maps
     std::vector<Texture> diffuse_maps = load_material_textures(
@@ -112,7 +111,6 @@ std::vector<Texture> Model::load_material_textures(aiMaterial *mat,
                                                    aiTextureType type,
                                                    std::string type_name) {
   std::vector<Texture> textures;
-  std::cout << "Texture count(type):" << mat->GetTextureCount(type) << std::endl;
   for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
     aiString texture_file_name;
     mat->GetTexture(type, i, &texture_file_name);

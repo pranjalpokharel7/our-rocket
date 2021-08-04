@@ -4,6 +4,7 @@ object_files/*
 models/*
 output
 rocket
+compile_commands.json
 
 CMakeCache.txt
 CMakeFiles/*

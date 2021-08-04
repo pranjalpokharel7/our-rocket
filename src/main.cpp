@@ -1,8 +1,8 @@
-#include "../Maths/Matrix.hpp"
-#include "../Maths/vec.hpp"
 #include "../include/renderer.h"
 #include "../include/model.hpp"
 #include "../include/stb_image.h"
+#include "../Maths/Matrix.hpp"
+#include "../Maths/vec.hpp"
 #include <GLFW/glfw3.h>
 
 static Render::State state;
@@ -41,8 +41,8 @@ int main() {
 
     projection = projection.perspective(1.0f, 30.0f);
     view = state.camera.ViewMatrix();
-    // TODO: write scale method for model matrix
     model = model.translate({0.0f, 0.0f, 0.0f});
+    model = model.scale({0.5f, 0.5f, 0.5f});
 
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, &model[0][0]);
     glUniformMatrix4fv(projection_loc, 1, GL_FALSE, &projection[0][0]);
