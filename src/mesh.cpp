@@ -40,7 +40,7 @@ void Mesh::setup_mesh() {
   glBindVertexArray(0);
 }
 
-void Mesh::draw_mesh(ShaderProgram &shader_program) {
+void Mesh::draw_mesh(unsigned int program_ID) {
   unsigned int diffuse_count = 1;
   unsigned int specular_count = 1;
   for (unsigned int i = 0; i < textures.size(); i++) {
@@ -54,7 +54,7 @@ void Mesh::draw_mesh(ShaderProgram &shader_program) {
     }
 
     // do I not need to use program here?
-    glUniform1f(glGetUniformLocation(shader_program.shader_program,
+    glUniform1f(glGetUniformLocation(program_ID,
                                      (texture_type + number).c_str()), i);
     glActiveTexture(GL_TEXTURE0 + i); // wait why this again?
     glBindTexture(GL_TEXTURE_2D, textures[i].id);

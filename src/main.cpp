@@ -27,6 +27,8 @@ int main() {
   Model mainModel("./models/backpack/backpack.obj");
 
   Cube cube;
+  cube.position = FMath::Vec3<float>(0.0f, 0.0f, -1.0f);
+  cube.scale = FMath::Vec3<float>(0.1f, 0.1f, 0.1f);
 
   glEnable(GL_DEPTH_TEST);
 
@@ -37,6 +39,9 @@ int main() {
     glUseProgram(render.shader_program.shader_program);
     FMath::Mat4 projection(1.0f), view(1.0f), model(1.0f);
 
+    projection = projection.perspective(1.0f, 30.0f); // 30 degrees so 30.0f
+    view = state.camera.ViewMatrix();
+
     //update_uniform_3f("light.position", render.shader_program.shader_program, state.camera.camera_pos);
     //update_uniform_3f("light.direction", render.shader_program.shader_program, state.camera.camera_front);
     //update_uniform_1f("light.cutOff", render.shader_program.shader_program, 0.997f);
@@ -45,10 +50,8 @@ int main() {
     //update_uniform_3f("light.diffuse", render.shader_program.shader_program, FMath::Vec3<float>(0.7f, 0.7f, 0.7f));
     //update_uniform_3f("light.specular", render.shader_program.shader_program, FMath::Vec3<float>(0.9f, 0.9f, 0.9f));
 
-    auto timer = glfwGetTime();
+    //auto timer = glfwGetTime();
 
-    projection = projection.perspective(1.0f, 30.0f); // 30 degrees so 30.0f
-    view = state.camera.ViewMatrix();
     model = model.translate({0.0f, 0.0f, -2.0f});
     model = model.scale({0.1f, 0.1f, 0.1f});
 
@@ -56,16 +59,13 @@ int main() {
     update_uniform_matrix_4f("projection", render.shader_program.shader_program, &projection[0][0]);
     update_uniform_matrix_4f("view", render.shader_program.shader_program, &view[0][0]);
 
-    mainModel.draw_model(render.shader_program);
+    mainModel.draw_model(render.shader_program.shader_program);
 
     glUseProgram(render.light_cube_shader_program.shader_program);
 
     model = FMath::Mat4<float>(1.0f);
-    projection = FMath::Mat4<float>(1.0f);
-
-    projection = projection.perspective(1.0f, 30.0f); // 30 degrees so 30.0f
-    model = model.translate({0.0f, 0.0f, -1.0f});
-    model = model.scale({0.1f, 0.1f, 0.1f});
+    model = model.translate(cube.position);
+    model = model.scale(cube.scale);
 
     update_uniform_matrix_4f("model", render.shader_program.shader_program, &model[0][0]);
     update_uniform_matrix_4f("projection", render.shader_program.shader_program, &projection[0][0]);

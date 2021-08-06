@@ -6,9 +6,9 @@ Model::Model(const char* path){
     load_model(std::string(path));
 }
 
-void Model::draw_model(ShaderProgram &shader_program) {
+void Model::draw_model(unsigned int program_ID) {
     for (unsigned int i = 0; i < meshes.size(); i++){
-        meshes[i].draw_mesh(shader_program);
+        meshes[i].draw_mesh(program_ID);
     }
 }
 

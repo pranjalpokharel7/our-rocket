@@ -26,7 +26,7 @@ public:
   Mesh();
   Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices,
        std::vector<Texture> textures);
-  void draw_mesh(ShaderProgram &shader_program);
+  void draw_mesh(unsigned int program_ID);
 
   std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;

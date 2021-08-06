@@ -20,5 +20,5 @@ class Model{
     public:
         Model();
         Model(const char *path);
-        void draw_model(ShaderProgram &shader_program);
+        void draw_model(unsigned int program_ID);
 };
