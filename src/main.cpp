@@ -17,15 +17,17 @@ int main() {
       ShaderProgram("./shader/model-vertex.glsl", "./shader/model-fragment.glsl");
 
   stbi_set_flip_vertically_on_load(true);
-  Model mainModel("./models/cyborg/cyborg.obj");
+  //Model mainModel("./models/cyborg/cyborg.obj");
+  //Model mainModel("./models/rocket/rocket.obj");
+  Model mainModel("./models/rocket2/rocks.obj");
+  //Model mainModel("./models/backpack/backpack.obj");
   glEnable(GL_DEPTH_TEST);
 
   while (!glfwWindowShouldClose(render.window)) {
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(render.shader_program.shader_program);
-
     FMath::Mat4 projection(1.0f), view(1.0f), model(1.0f);
 
     unsigned int projection_loc =
@@ -39,10 +41,10 @@ int main() {
 
     auto timer = glfwGetTime();
 
-    projection = projection.perspective(1.0f, 30.0f);
+    projection = projection.perspective(1.0f, 30.0f); // 30 degrees so 30.0f
     view = state.camera.ViewMatrix();
-    model = model.translate({0.0f, 0.0f, 0.0f});
-    model = model.scale({0.5f, 0.5f, 0.5f});
+    model = model.translate({0.0f, 0.0f, -6.0f});
+    model = model.scale({0.1f, 0.1f, 0.1f});
 
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, &model[0][0]);
     glUniformMatrix4fv(projection_loc, 1, GL_FALSE, &projection[0][0]);

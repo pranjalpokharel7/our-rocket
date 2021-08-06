@@ -16,7 +16,7 @@ void Model::load_model(std::string path) {
   // use trianles as primitives, flip texture coordinates to make it opengl
   // oriented
   Assimp::Importer importer;
-  auto scene = importer.ReadFile(path, aiProcess_Triangulate & aiProcess_FlipUVs );
+  auto scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
   if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
       !scene->mRootNode) {
     std::cerr << "ERROR - ASSIMP::" << importer.GetErrorString() << std::endl;
@@ -26,16 +26,16 @@ void Model::load_model(std::string path) {
 }
 
 void Model::process_node(aiNode *node, const aiScene *scene) {
-  for (unsigned int mesh_index = 0; mesh_index < scene->mNumMeshes; mesh_index++) {
+  for (unsigned int mesh_index = 0; mesh_index < node->mNumMeshes; mesh_index++) {
     // only the root scene mMeshes array contains the actual mesh data
     // the other children nodes only contain the index for the mesh in the root
     // array
-    aiMesh *mesh = scene->mMeshes[mesh_index];
+    aiMesh *mesh = scene->mMeshes[node->mMeshes[mesh_index]];
     meshes.push_back(process_mesh(mesh, scene, mesh_index));
   }
   // then continue the process for it's children once processing for that node
   // is complete
-  for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+  for (unsigned int i = 0; i < node->mNumChildren; i++) {
     process_node(node->mChildren[i], scene);
   }
 }
@@ -67,9 +67,11 @@ Mesh Model::process_mesh(aiMesh *mesh, const aiScene *scene, unsigned int mesh_i
 
     // process texture coordinates, first check if the mesh actually contains
     // textures
+    //std::cout << "TexCoords: " << mesh->mTextureCoords[0][i].x << std::endl;
     if (mesh->mTextureCoords[0]) {
-      FMath::Vec2<float> vec(mesh->mTextureCoords[0][i].x,
-                             mesh->mTextureCoords[0][i].y);
+      FMath::Vec2<float> vec;
+      vec.x = mesh->mTextureCoords[0][i].x;
+      vec.y = mesh->mTextureCoords[0][i].y;
       vertex.tex_coords.x = vec.x;
       vertex.tex_coords.y = vec.y;
     } else {
@@ -91,7 +93,7 @@ Mesh Model::process_mesh(aiMesh *mesh, const aiScene *scene, unsigned int mesh_i
   // process material
   if (mesh->mMaterialIndex >= 0) {
     // process materials
-    aiMaterial *material = scene->mMaterials[scene->mMeshes[mesh_index]->mMaterialIndex];
+    aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
     // 1. diffuse maps
     std::vector<Texture> diffuse_maps = load_material_textures(
@@ -141,6 +143,7 @@ std::vector<Texture> Model::load_material_textures(aiMaterial *mat,
 unsigned int Model::texture_from_file(const char *file_path) {
   std::string file_name = std::string(file_path);
   file_name = directory + '/' + file_name;
+  std::cout << file_name << std::endl;
 
   unsigned int texture;
   glGenTextures(1, &texture);
@@ -168,8 +171,8 @@ unsigned int Model::texture_from_file(const char *file_path) {
   glGenerateMipmap(GL_TEXTURE_2D); // only base mipmap generated since
 
   // set repeeat parameters for the texture on S and T axes
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
   // set filtering methods to mip maps (maginification/minification)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
