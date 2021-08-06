@@ -49,8 +49,12 @@ int main() {
     update_uniform_3f("viewPos", render.shader_program.shader_program, state.camera.camera_pos);
     update_uniform_3f("light.position", render.shader_program.shader_program, cube.position);
 
-    update_uniform_3f("light.ambient", render.shader_program.shader_program, FMath::Vec3<float>(0.1f, 0.0f, 0.0f));
+    update_uniform_3f("light.ambient", render.shader_program.shader_program, FMath::Vec3<float>(0.2f, 0.1f, 0.1f));
     update_uniform_3f("light.diffuse", render.shader_program.shader_program, FMath::Vec3<float>(0.7f, 0.1f, 0.1f));
+
+    update_uniform_1f("light.constantAtten", render.shader_program.shader_program, 1.0f);
+    update_uniform_1f("light.linearAtten", render.shader_program.shader_program, 0.35f);
+    update_uniform_1f("light.quadraticAtten", render.shader_program.shader_program, 0.44f);
     //update_uniform_3f("light.specular", render.shader_program.shader_program, FMath::Vec3<float>(1.0f, 1.0f, 1.0f));
 
     model = model.translate({0.0f, 0.0f, 0.0f});
