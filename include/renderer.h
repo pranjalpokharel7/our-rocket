@@ -29,7 +29,7 @@ struct Renderer
   unsigned vbo_offset = 0;
   unsigned max_allocated = 0;
   ShaderProgram shader_program;
-
+  ShaderProgram light_cube_shader_program;
 };
 
 namespace Render {

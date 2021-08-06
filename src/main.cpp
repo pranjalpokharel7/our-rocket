@@ -1,6 +1,8 @@
 #include "../include/renderer.h"
 #include "../include/model.hpp"
 #include "../include/stb_image.h"
+#include "../include/helpers.hpp"
+#include "../include/cube.hpp"
 #include "../Maths/Matrix.hpp"
 #include "../Maths/vec.hpp"
 #include <GLFW/glfw3.h>
@@ -15,42 +17,61 @@ int main() {
   auto render = Render::CreateRenderer();
   render.shader_program =
       ShaderProgram("./shader/model-vertex.glsl", "./shader/model-fragment.glsl");
+  render.light_cube_shader_program = ShaderProgram("./shader/light-cube-vertex.glsl","./shader/light-cube-fragment.glsl");
 
   stbi_set_flip_vertically_on_load(true);
+
   //Model mainModel("./models/cyborg/cyborg.obj");
   //Model mainModel("./models/rocket/rocket.obj");
-  Model mainModel("./models/rocket2/rocks.obj");
-  //Model mainModel("./models/backpack/backpack.obj");
+  //Model mainModel("./models/rocket2/rocks.obj");
+  Model mainModel("./models/backpack/backpack.obj");
+
+  Cube cube;
+
   glEnable(GL_DEPTH_TEST);
 
   while (!glfwWindowShouldClose(render.window)) {
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(render.shader_program.shader_program);
     FMath::Mat4 projection(1.0f), view(1.0f), model(1.0f);
 
-    unsigned int projection_loc =
-        glGetUniformLocation(render.shader_program.shader_program, "projection");
+    //update_uniform_3f("light.position", render.shader_program.shader_program, state.camera.camera_pos);
+    //update_uniform_3f("light.direction", render.shader_program.shader_program, state.camera.camera_front);
+    //update_uniform_1f("light.cutOff", render.shader_program.shader_program, 0.997f);
 
-    unsigned int model_loc =
-        glGetUniformLocation(render.shader_program.shader_program, "model");
-
-    unsigned int view_loc =
-        glGetUniformLocation(render.shader_program.shader_program, "view");
+    //update_uniform_3f("light.ambient", render.shader_program.shader_program, FMath::Vec3<float>(0.5f, 0.5f, 0.5f));
+    //update_uniform_3f("light.diffuse", render.shader_program.shader_program, FMath::Vec3<float>(0.7f, 0.7f, 0.7f));
+    //update_uniform_3f("light.specular", render.shader_program.shader_program, FMath::Vec3<float>(0.9f, 0.9f, 0.9f));
 
     auto timer = glfwGetTime();
 
     projection = projection.perspective(1.0f, 30.0f); // 30 degrees so 30.0f
     view = state.camera.ViewMatrix();
-    model = model.translate({0.0f, 0.0f, -6.0f});
+    model = model.translate({0.0f, 0.0f, -2.0f});
     model = model.scale({0.1f, 0.1f, 0.1f});
 
-    glUniformMatrix4fv(model_loc, 1, GL_FALSE, &model[0][0]);
-    glUniformMatrix4fv(projection_loc, 1, GL_FALSE, &projection[0][0]);
-    glUniformMatrix4fv(view_loc, 1, GL_FALSE, &view[0][0]);
+    update_uniform_matrix_4f("model", render.shader_program.shader_program, &model[0][0]);
+    update_uniform_matrix_4f("projection", render.shader_program.shader_program, &projection[0][0]);
+    update_uniform_matrix_4f("view", render.shader_program.shader_program, &view[0][0]);
 
     mainModel.draw_model(render.shader_program);
+
+    glUseProgram(render.light_cube_shader_program.shader_program);
+
+    model = FMath::Mat4<float>(1.0f);
+    projection = FMath::Mat4<float>(1.0f);
+
+    projection = projection.perspective(1.0f, 30.0f); // 30 degrees so 30.0f
+    model = model.translate({0.0f, 0.0f, -1.0f});
+    model = model.scale({0.1f, 0.1f, 0.1f});
+
+    update_uniform_matrix_4f("model", render.shader_program.shader_program, &model[0][0]);
+    update_uniform_matrix_4f("projection", render.shader_program.shader_program, &projection[0][0]);
+    update_uniform_matrix_4f("view", render.shader_program.shader_program, &view[0][0]);
+
+    cube.draw_cube(render.light_cube_shader_program.shader_program);
 
     handleEvents(render.window);
     glfwPollEvents();
