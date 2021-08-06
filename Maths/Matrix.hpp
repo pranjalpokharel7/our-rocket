@@ -14,13 +14,14 @@ template <typename T, typename = std::enable_if_t<std::is_integral_v<T> ||
 class Mat4 {
   // Opengl uses column major order .. so we will go with that .. Might look
   // opposite but its what OpengL use internally
-  T elements[4][4] = {};
+  T elements[4][4] = {0};
 
 public:
   Mat4() = default;
 
   // Pass one to initialize as identifty array
   Mat4(T num) {
+
     for (int i = 0; i < 4; ++i)
       elements[i][i] = num;
   }

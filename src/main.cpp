@@ -23,11 +23,11 @@ int main() {
 
   //Model mainModel("./models/cyborg/cyborg.obj");
   //Model mainModel("./models/rocket/rocket.obj");
-  //Model mainModel("./models/rocket2/rocks.obj");
-  Model mainModel("./models/backpack/backpack.obj");
+  Model mainModel("./models/rocket2/rocks.obj");
+  //Model mainModel("./models/backpack/backpack.obj");
 
   Cube cube;
-  cube.position = FMath::Vec3<float>(0.0f, 0.0f, -1.0f);
+  cube.position = FMath::Vec3<float>(0.0f, 1.0f, -9.0f);
   cube.scale = FMath::Vec3<float>(0.1f, 0.1f, 0.1f);
 
   glEnable(GL_DEPTH_TEST);
@@ -37,22 +37,23 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(render.shader_program.shader_program);
-    FMath::Mat4 projection(1.0f), view(1.0f), model(1.0f);
+    FMath::Mat4 projection(1.0f), view(1.0f), model(1.0f), cube_model(1.0f);
 
     projection = projection.perspective(1.0f, 30.0f); // 30 degrees so 30.0f
     view = state.camera.ViewMatrix();
 
-    //update_uniform_3f("light.position", render.shader_program.shader_program, state.camera.camera_pos);
-    //update_uniform_3f("light.direction", render.shader_program.shader_program, state.camera.camera_front);
-    //update_uniform_1f("light.cutOff", render.shader_program.shader_program, 0.997f);
+    // rotating light
+    cube.position.x = sin(glfwGetTime());
+    cube.position.z = -3.0f * cos(glfwGetTime());
 
-    //update_uniform_3f("light.ambient", render.shader_program.shader_program, FMath::Vec3<float>(0.5f, 0.5f, 0.5f));
-    //update_uniform_3f("light.diffuse", render.shader_program.shader_program, FMath::Vec3<float>(0.7f, 0.7f, 0.7f));
-    //update_uniform_3f("light.specular", render.shader_program.shader_program, FMath::Vec3<float>(0.9f, 0.9f, 0.9f));
+    update_uniform_3f("viewPos", render.shader_program.shader_program, state.camera.camera_pos);
+    update_uniform_3f("light.position", render.shader_program.shader_program, cube.position);
 
-    //auto timer = glfwGetTime();
+    update_uniform_3f("light.ambient", render.shader_program.shader_program, FMath::Vec3<float>(0.1f, 0.0f, 0.0f));
+    update_uniform_3f("light.diffuse", render.shader_program.shader_program, FMath::Vec3<float>(0.7f, 0.1f, 0.1f));
+    //update_uniform_3f("light.specular", render.shader_program.shader_program, FMath::Vec3<float>(1.0f, 1.0f, 1.0f));
 
-    model = model.translate({0.0f, 0.0f, -2.0f});
+    model = model.translate({0.0f, 0.0f, 0.0f});
     model = model.scale({0.1f, 0.1f, 0.1f});
 
     update_uniform_matrix_4f("model", render.shader_program.shader_program, &model[0][0]);
@@ -63,11 +64,10 @@ int main() {
 
     glUseProgram(render.light_cube_shader_program.shader_program);
 
-    model = FMath::Mat4<float>(1.0f);
-    model = model.translate(cube.position);
-    model = model.scale(cube.scale);
+    cube_model = cube_model.translate(cube.position);
+    cube_model = cube_model.scale(cube.scale);
 
-    update_uniform_matrix_4f("model", render.shader_program.shader_program, &model[0][0]);
+    update_uniform_matrix_4f("model", render.shader_program.shader_program, &cube_model[0][0]);
     update_uniform_matrix_4f("projection", render.shader_program.shader_program, &projection[0][0]);
     update_uniform_matrix_4f("view", render.shader_program.shader_program, &view[0][0]);
 
