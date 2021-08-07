@@ -2,6 +2,7 @@
 .vscode/*
 object_files/*
 models/*
+resources/*
 output
 rocket
 compile_commands.json
