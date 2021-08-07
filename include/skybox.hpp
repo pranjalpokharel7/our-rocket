@@ -12,7 +12,7 @@ class SkyBox{
     public:
         SkyBox();
         void draw_skybox();
-        void load_skybox_textures(std::string skybox_textures[]);
+        void load_skybox_textures(const char* skybox_textures[]);
 
         int number_of_textures = 6; // we have 6 faces for each face of cube
 };

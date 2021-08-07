@@ -21,3 +21,15 @@ void update_uniform_1i(const char *uniform_name, unsigned int program_ID,
     unsigned int uniform_loc = glGetUniformLocation(program_ID, uniform_name);
     glUniform1i(uniform_loc, uniform_value);
 }
+
+FMath::Vec3<float> ambient(FMath::Vec3<float> color){
+   return FMath::Vec3<float>(color.r * 0.3, color.g * 0.3, color.b * 0.3);
+}
+
+FMath::Vec3<float> diffuse(FMath::Vec3<float> color){
+   return FMath::Vec3<float>(color.r * 0.7, color.g * 0.7, color.b * 0.7);
+}
+
+FMath::Vec3<float> specular(FMath::Vec3<float> color){
+   return FMath::Vec3<float>(color.r * 0.9, color.g * 0.9, color.b * 0.9);
+}

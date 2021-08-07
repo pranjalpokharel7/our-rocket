@@ -37,6 +37,35 @@ public:
     return id * *this;
   }
 
+  // only when scaling and transformation are applied
+  // does not cover rotation, if your model is rotating,
+  // better do the inverse calculation in the GPU itself
+  constexpr Mat4 model_mat_inverse(const Mat4<T> model_mat) {
+    elements[0][0] = 1 / model_mat[0][0];
+    elements[1][1] = 1 / model_mat[1][1];
+    elements[2][2] = 1 / model_mat[2][2];
+    elements[3][3] = model_mat[3][3];
+
+    elements[0][3] = model_mat[0][3] / model_mat[0][0];
+    elements[1][3] = model_mat[1][3] / model_mat[1][1];
+    elements[2][3] = model_mat[2][3] / model_mat[2][2];
+
+    return *this;
+  }
+
+  constexpr Mat4 transpose() {
+    Mat4<float> id;
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        // no this is wrong, hmm
+        id[i][j] = elements[j][i];
+      }
+    }
+
+    return id;
+  }
+
+  // modifies the original array, can we think of something else here?
   constexpr Mat4 clip_upper_triagular_mat(){
     elements[0][3] = 0;
     elements[1][3] = 0;
@@ -119,7 +148,7 @@ public:
   }
 
   Mat4 perspective(float aspect_ratio, float fovy = 45.0f,
-                   float near_plane = 0.1f, float far_plane = 10.0f) {
+                   float near_plane = 0.1f, float far_plane = 100.0f) {
     Mat4 id{1.0f}; // Need c++17 conformance compiler
     float tan_fovy = std::sin(FMath::DegreeToRadians(fovy)) /
                      std::cos(FMath::DegreeToRadians(fovy));

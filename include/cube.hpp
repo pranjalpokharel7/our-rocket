@@ -16,6 +16,7 @@ public:
 
     FMath::Vec3<float> position;
     FMath::Vec3<float> scale;
+    FMath::Vec3<float> color;
 };
 
 #endif

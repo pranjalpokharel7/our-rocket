@@ -48,13 +48,13 @@ void SkyBox::draw_skybox() {
   glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
-void SkyBox::load_skybox_textures(std::string *skybox_textures) {
+void SkyBox::load_skybox_textures(const char* skybox_textures[]) {
   glGenTextures(1, &texture_ID);
   glBindTexture(GL_TEXTURE_CUBE_MAP, texture_ID);
   stbi_set_flip_vertically_on_load(false);
   int img_width, img_height, nr_channels;
   for (int i = 0; i < number_of_textures; i++) {
-    unsigned char *img_data = stbi_load(skybox_textures[i].c_str(), &img_width,
+    unsigned char *img_data = stbi_load(skybox_textures[i], &img_width,
                                         &img_height, &nr_channels, 0);
     if (!img_data) {
       std::cerr << "Cubemap texture failed to load at path : "

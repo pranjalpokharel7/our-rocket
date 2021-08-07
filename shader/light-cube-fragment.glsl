@@ -1,7 +1,9 @@
 #version 330 core
 
+uniform vec3 cubeColor;
+
 out vec4 FragColor;
 
 void main(){
-    FragColor = vec4(1.0, 0.1, 0.1, 1.0); // all bright light source
+    FragColor = vec4(cubeColor, 1.0); // all bright light source
 }

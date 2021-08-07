@@ -31,8 +31,9 @@ int main() {
   Cube cube;
   cube.position = FMath::Vec3<float>(0.0f, 1.0f, -9.0f);
   cube.scale = FMath::Vec3<float>(0.1f, 0.1f, 0.1f);
+  cube.color = FMath::Vec3<float>(1.0f, 1.0f, 1.0f);
 
-  std::string skybox_textures[6] = {
+  const char* skybox_textures[6] = {
     "./resources/skybox/right.jpg",
     "./resources/skybox/left.jpg",
     "./resources/skybox/top.jpg",
@@ -47,12 +48,19 @@ int main() {
 
   glEnable(GL_DEPTH_TEST);
 
+  // pre-main loop optimization
+  FMath::Mat4 model(1.0f), inverse_model(1.0f);
+  model = model.translate({0.0f, 0.0f, 0.0f});
+  model = model.scale({0.1f, 0.1f, 0.1f});
+  inverse_model = inverse_model.model_mat_inverse(model);
+  inverse_model = inverse_model.transpose();
+
   while (!glfwWindowShouldClose(render.window)) {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(render.shader_program.shader_program);
-    FMath::Mat4 projection(1.0f), view(1.0f), model(1.0f), cube_model(1.0f);
+    FMath::Mat4 projection(1.0f), view(1.0f), cube_model(1.0f);
 
     projection = projection.perspective(1.0f, 30.0f); // 30 degrees so 30.0f
     view = state.camera.ViewMatrix();
@@ -64,18 +72,16 @@ int main() {
     update_uniform_3f("viewPos", render.shader_program.shader_program, state.camera.camera_pos);
     update_uniform_3f("light.position", render.shader_program.shader_program, cube.position);
 
-    update_uniform_3f("light.ambient", render.shader_program.shader_program, FMath::Vec3<float>(0.2f, 0.1f, 0.1f));
-    update_uniform_3f("light.diffuse", render.shader_program.shader_program, FMath::Vec3<float>(0.7f, 0.1f, 0.1f));
+    update_uniform_3f("light.ambient", render.shader_program.shader_program, ambient(cube.color));
+    update_uniform_3f("light.diffuse", render.shader_program.shader_program, diffuse(cube.color));
 
     update_uniform_1f("light.constantAtten", render.shader_program.shader_program, 1.0f);
     update_uniform_1f("light.linearAtten", render.shader_program.shader_program, 0.35f);
     update_uniform_1f("light.quadraticAtten", render.shader_program.shader_program, 0.44f);
     //update_uniform_3f("light.specular", render.shader_program.shader_program, FMath::Vec3<float>(1.0f, 1.0f, 1.0f));
 
-    model = model.translate({0.0f, 0.0f, 0.0f});
-    model = model.scale({0.1f, 0.1f, 0.1f});
-
     update_uniform_matrix_4f("model", render.shader_program.shader_program, &model[0][0]);
+    update_uniform_matrix_4f("inv_model", render.shader_program.shader_program, &inverse_model[0][0]);
     update_uniform_matrix_4f("projection", render.shader_program.shader_program, &projection[0][0]);
     update_uniform_matrix_4f("view", render.shader_program.shader_program, &view[0][0]);
 
@@ -87,9 +93,11 @@ int main() {
     cube_model = cube_model.translate(cube.position);
     cube_model = cube_model.scale(cube.scale);
 
-    update_uniform_matrix_4f("model", render.shader_program.shader_program, &cube_model[0][0]);
-    update_uniform_matrix_4f("projection", render.shader_program.shader_program, &projection[0][0]);
-    update_uniform_matrix_4f("view", render.shader_program.shader_program, &view[0][0]);
+    update_uniform_3f("cubeColor", render.light_cube_shader_program.shader_program, cube.color);
+
+    update_uniform_matrix_4f("model", render.light_cube_shader_program.shader_program, &cube_model[0][0]);
+    update_uniform_matrix_4f("projection", render.light_cube_shader_program.shader_program, &projection[0][0]);
+    update_uniform_matrix_4f("view", render.light_cube_shader_program.shader_program, &view[0][0]);
 
     cube.draw_cube();
 
