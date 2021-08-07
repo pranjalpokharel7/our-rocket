@@ -15,3 +15,9 @@ void update_uniform_matrix_4f(const char *uniform_name, unsigned int program_ID,
     unsigned int uniform_loc = glGetUniformLocation(program_ID, uniform_name);
     glUniformMatrix4fv(uniform_loc, 1, GL_FALSE, first_element_address);
 }
+
+void update_uniform_1i(const char *uniform_name, unsigned int program_ID,
+                       int uniform_value){
+    unsigned int uniform_loc = glGetUniformLocation(program_ID, uniform_name);
+    glUniform1i(uniform_loc, uniform_value);
+}

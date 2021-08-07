@@ -21,7 +21,6 @@ public:
 
   // Pass one to initialize as identifty array
   Mat4(T num) {
-
     for (int i = 0; i < 4; ++i)
       elements[i][i] = num;
   }
@@ -36,6 +35,17 @@ public:
     id[3][1] = vec.y;
     id[3][2] = vec.z;
     return id * *this;
+  }
+
+  constexpr Mat4 clip_upper_triagular_mat(){
+    elements[0][3] = 0;
+    elements[1][3] = 0;
+    elements[2][3] = 0;
+    elements[3][0] = 0;
+    elements[3][1] = 0;
+    elements[3][2] = 0;
+    elements[3][3] = 1;
+    return *this;
   }
 
   constexpr Mat4 scale(const Vec3<T> &vec){

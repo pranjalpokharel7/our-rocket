@@ -3,6 +3,7 @@
 #include "../include/stb_image.h"
 #include "../include/helpers.hpp"
 #include "../include/cube.hpp"
+#include "../include/skybox.hpp"
 #include "../Maths/Matrix.hpp"
 #include "../Maths/vec.hpp"
 #include <GLFW/glfw3.h>
@@ -18,6 +19,7 @@ int main() {
   render.shader_program =
       ShaderProgram("./shader/model-vertex.glsl", "./shader/model-fragment.glsl");
   render.light_cube_shader_program = ShaderProgram("./shader/light-cube-vertex.glsl","./shader/light-cube-fragment.glsl");
+  render.skybox_shader_program = ShaderProgram("./shader/skybox-vertex.glsl","./shader/skybox-fragment.glsl");
 
   stbi_set_flip_vertically_on_load(true);
 
@@ -29,6 +31,19 @@ int main() {
   Cube cube;
   cube.position = FMath::Vec3<float>(0.0f, 1.0f, -9.0f);
   cube.scale = FMath::Vec3<float>(0.1f, 0.1f, 0.1f);
+
+  std::string skybox_textures[6] = {
+    "./resources/skybox/right.jpg",
+    "./resources/skybox/left.jpg",
+    "./resources/skybox/top.jpg",
+    "./resources/skybox/bottom.jpg",
+    "./resources/skybox/front.jpg",
+    "./resources/skybox/back.jpg"
+  };
+  SkyBox skybox;
+  skybox.load_skybox_textures(skybox_textures);
+  glUseProgram(render.skybox_shader_program.shader_program);
+  update_uniform_1i("skybox", render.skybox_shader_program.shader_program, 0);
 
   glEnable(GL_DEPTH_TEST);
 
@@ -66,6 +81,7 @@ int main() {
 
     mainModel.draw_model(render.shader_program.shader_program);
 
+    // light cube render
     glUseProgram(render.light_cube_shader_program.shader_program);
 
     cube_model = cube_model.translate(cube.position);
@@ -75,7 +91,20 @@ int main() {
     update_uniform_matrix_4f("projection", render.shader_program.shader_program, &projection[0][0]);
     update_uniform_matrix_4f("view", render.shader_program.shader_program, &view[0][0]);
 
-    cube.draw_cube(render.light_cube_shader_program.shader_program);
+    cube.draw_cube();
+
+    // skybox render
+    glDepthFunc(GL_LEQUAL);
+    glUseProgram(render.skybox_shader_program.shader_program);
+
+    view = view.clip_upper_triagular_mat();
+
+    update_uniform_matrix_4f("projection", render.skybox_shader_program.shader_program, &projection[0][0]);
+    update_uniform_matrix_4f("view", render.skybox_shader_program.shader_program, &view[0][0]);
+
+    skybox.draw_skybox();
+
+    glDepthFunc(GL_LESS);
 
     handleEvents(render.window);
     glfwPollEvents();

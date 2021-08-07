@@ -66,7 +66,7 @@ void Cube::setup_cube(){
   glBindVertexArray(0);
 }
 
-void Cube::draw_cube(unsigned int program_ID){
+void Cube::draw_cube(){
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }

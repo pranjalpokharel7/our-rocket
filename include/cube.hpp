@@ -12,7 +12,7 @@ private:
 
 public:
     Cube();
-    void draw_cube(unsigned int program_ID);
+    void draw_cube();
 
     FMath::Vec3<float> position;
     FMath::Vec3<float> scale;
