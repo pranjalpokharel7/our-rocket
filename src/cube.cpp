@@ -69,4 +69,5 @@ void Cube::setup_cube(){
 void Cube::draw_cube(){
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
 }

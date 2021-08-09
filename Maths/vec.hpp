@@ -175,7 +175,9 @@ constexpr Vec3<T> operator/(Vec3<T> vec, U num) {
 // Overloading the output operator
 // vec3
 template <typename T> std::ostream &operator<<(std::ostream &os, Vec3<T> vec) {
-  return os << "\nr ->  " << vec.r << "  g -> " << vec.g << "  b -> " << vec.b
+  //return os << "\nr ->  " << vec.r << "  g -> " << vec.g << "  b -> " << vec.b
+  //          << std::endl;
+  return os << "\nFMath::Vec3(" << vec.r << ", " << vec.g << ", " << vec.b << ")"
             << std::endl;
 }
 

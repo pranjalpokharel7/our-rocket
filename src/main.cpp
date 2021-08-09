@@ -8,6 +8,8 @@
 #include "../Maths/vec.hpp"
 #include <GLFW/glfw3.h>
 
+//#define NR_LIGHT_CUBES 3
+
 static Render::State state;
 
 static void handleEvents(GLFWwindow *window);
@@ -28,10 +30,25 @@ int main() {
   Model mainModel("./models/rocket2/rocks.obj");
   //Model mainModel("./models/backpack/backpack.obj");
 
-  Cube cube;
-  cube.position = FMath::Vec3<float>(0.0f, 1.0f, -9.0f);
-  cube.scale = FMath::Vec3<float>(0.1f, 0.1f, 0.1f);
-  cube.color = FMath::Vec3<float>(1.0f, 1.0f, 1.0f);
+  FMath::Vec3<float> cube_positions[] = {
+      FMath::Vec3(0.6964f,  1.666f, 0.706876f),
+      FMath::Vec3(1.06075f, 1.01993f, -0.6604f),
+      FMath::Vec3(1.1641f, 1.01472f, 1.03914f),
+  };
+  FMath::Vec3<float> cube_colors[] = {
+      //FMath::Vec3(1.0f, 1.0f, 1.0f),
+      FMath::Vec3(0.498f, 1.000f, 0.831f),
+      FMath::Vec3(0.863f, 0.078f, 0.235f),
+      FMath::Vec3(1.000f, 0.843f, 0.000f),
+  };
+  int NR_LIGHT_CUBES = sizeof(cube_positions) / (3 * sizeof(float));
+
+  Cube cubes[NR_LIGHT_CUBES];
+  for (int i = 0; i < NR_LIGHT_CUBES; i++){
+    cubes[i].position = cube_positions[i];
+    cubes[i].scale = FMath::Vec3<float>(0.08f, 0.08f, 0.08f);
+    cubes[i].color = cube_colors[i];
+  }
 
   const char* skybox_textures[6] = {
     "./resources/skybox/right.jpg",
@@ -68,20 +85,28 @@ int main() {
 
     view = state.camera.ViewMatrix();
 
-    // rotating light
-    cube.position.x = sin(glfwGetTime());
-    cube.position.z = -3.0f * cos(glfwGetTime());
+    update_uniform_3f("viewPos", render.shader_program.shader_program,
+                      state.camera.camera_pos);
+    for (int i = 0; i < NR_LIGHT_CUBES; i++) {
+      update_uniform_3f(
+          std::string("light[" + std::to_string(i) + "].position").c_str(),
+          render.shader_program.shader_program, cubes[i].position);
 
-    update_uniform_3f("viewPos", render.shader_program.shader_program, state.camera.camera_pos);
-    update_uniform_3f("light.position", render.shader_program.shader_program, cube.position);
+      update_uniform_3f(std::string("light[" + std::to_string(i) + "].ambient").c_str(), render.shader_program.shader_program,
+                        ambient(cubes[i].color));
+      update_uniform_3f(std::string("light[" + std::to_string(i) + "].diffuse").c_str(), render.shader_program.shader_program,
+                        diffuse(cubes[i].color));
+      update_uniform_3f(std::string("light[" + std::to_string(i) + "].specular").c_str(), render.shader_program.shader_program,
+                        specular(cubes[i].color));
 
-    update_uniform_3f("light.ambient", render.shader_program.shader_program, ambient(cube.color));
-    update_uniform_3f("light.diffuse", render.shader_program.shader_program, diffuse(cube.color));
-    update_uniform_3f("light.specular", render.shader_program.shader_program, specular(cube.color));
-
-    update_uniform_1f("light.constantAtten", render.shader_program.shader_program, 1.0f);
-    update_uniform_1f("light.linearAtten", render.shader_program.shader_program, 0.35f);
-    update_uniform_1f("light.quadraticAtten", render.shader_program.shader_program, 0.44f);
+      // TODO: maybe use default values for this one? just an optimization thought
+      update_uniform_1f(std::string("light[" + std::to_string(i) + "].constantAtten").c_str(),
+                        render.shader_program.shader_program, 1.0f);
+      update_uniform_1f(std::string("light[" + std::to_string(i) + "].linearAtten").c_str(),
+                        render.shader_program.shader_program, 0.35f);
+      update_uniform_1f(std::string("light[" + std::to_string(i) + "].quadraticAtten").c_str(),
+                        render.shader_program.shader_program, 0.44f);
+    }
 
     update_uniform_matrix_4f("model", render.shader_program.shader_program, &model[0][0]);
     update_uniform_matrix_4f("inv_model", render.shader_program.shader_program, &inverse_model[0][0]);
@@ -92,17 +117,20 @@ int main() {
 
     // light cube render
     glUseProgram(render.light_cube_shader_program.shader_program);
-
-    cube_model = cube_model.translate(cube.position);
-    cube_model = cube_model.scale(cube.scale);
-
-    update_uniform_3f("cubeColor", render.light_cube_shader_program.shader_program, cube.color);
-
-    update_uniform_matrix_4f("model", render.light_cube_shader_program.shader_program, &cube_model[0][0]);
     update_uniform_matrix_4f("projection", render.light_cube_shader_program.shader_program, &projection[0][0]);
     update_uniform_matrix_4f("view", render.light_cube_shader_program.shader_program, &view[0][0]);
 
-    cube.draw_cube();
+    // TODO: use instanced cubes
+    glBindVertexArray(cubes[0].VAO);
+    for (int i = 0; i < NR_LIGHT_CUBES; i++){
+      cube_model = FMath::Mat4<float>(1.0f);
+      cube_model = cube_model.translate(cubes[i].position);
+      cube_model = cube_model.scale(cubes[i].scale);
+
+      update_uniform_3f("cubeColor", render.light_cube_shader_program.shader_program, cubes[i].color);
+      update_uniform_matrix_4f("model", render.light_cube_shader_program.shader_program, &cube_model[0][0]);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 
     // skybox render
     glDepthFunc(GL_LEQUAL);
@@ -178,10 +206,15 @@ void handleEvents(GLFWwindow *window) {
     state.first_frame = false;
   }
 
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
     state.camera.camera_pos =
         state.camera.camera_pos + state.camera.camera_front * state.delta_time;
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+  }
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
     state.camera.camera_pos =
         state.camera.camera_pos - state.camera.camera_front * state.delta_time;
+  }
+  if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
+    std::cout << state.camera.camera_pos << std::endl;
+  }
 }

@@ -7,7 +7,7 @@
 
 class Cube{
 private:
-    unsigned int VAO, VBO;
+    unsigned int VBO;
     void setup_cube();
 
 public:
@@ -17,6 +17,7 @@ public:
     FMath::Vec3<float> position;
     FMath::Vec3<float> scale;
     FMath::Vec3<float> color;
+    unsigned int VAO;
 };
 
 #endif
