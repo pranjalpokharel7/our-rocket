@@ -1,6 +1,6 @@
 #include "../include/cube.hpp"
 
-float cube_vertices[] = {
+static float cube_vertices[] = {
      // positions         // normals
     -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
      0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
@@ -45,6 +45,7 @@ float cube_vertices[] = {
     -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 };
 
+
 Cube::Cube(){
     setup_cube();
 }
@@ -60,7 +61,7 @@ void Cube::setup_cube(){
 
   // vertex attributes, {coordinates}
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 
   // unbind vao so other objects can be bound later
   glBindVertexArray(0);

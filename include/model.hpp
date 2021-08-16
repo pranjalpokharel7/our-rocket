@@ -4,6 +4,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+
 class Model{
     private:
         std::vector<Texture> textures_loaded;
@@ -20,5 +21,6 @@ class Model{
     public:
         Model();
         Model(const char *path);
-        void draw_model(unsigned int program_ID);
+  void draw_model(unsigned int program_ID, unsigned int zprogram,Render::ZRender& zrender);
 };
+

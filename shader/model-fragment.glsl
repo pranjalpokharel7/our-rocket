@@ -24,36 +24,52 @@ uniform vec3 viewPos;
 uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_specular1;
 
+uniform sampler2D depthBuffer;
+uniform sampler2D prevBuffer;
+
 void main(){
-    vec3 textureDiffuse = texture(texture_diffuse1, TexCoords).rgb;
-    vec3 textureSpecular = texture(texture_diffuse1, TexCoords).rgb;
-    vec3 result = vec3(0.0, 0.0, 0.0);
-    vec3 norm = normalize(Normal);
-    vec3 viewDir = normalize(viewPos - FragPos);
 
-    for (int i = 0; i < NR_LIGHTS; i++){
-        // ambient
-        vec3 ambient = light[i].ambient * textureDiffuse;
+    vec4 color = texture(depthBuffer,gl_FragCoord.xy/800.0f);
+    float prev_depth = color.x;
+    float new_depth = pow(gl_FragCoord.z, 50);
 
-        // diffuse
-        vec3 lightDir = normalize(light[i].position - FragPos);
-        float diff = max(dot(norm, lightDir), 0.0);
-        vec3 diffuse = light[i].diffuse * diff * textureDiffuse;
+    if (new_depth <= prev_depth + 0.0025f )
+    { 
 
-        // specular
-        vec3 reflectDir = reflect(-lightDir, norm);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0); // hard-coded shininess for now
-        vec3 specular = light[i].specular * (spec * textureSpecular); // our material does not have a specular tecture yet
+      vec3 textureDiffuse = texture(texture_diffuse1, TexCoords).rgb;
+      vec3 textureSpecular = texture(texture_diffuse1, TexCoords).rgb;
+      vec3 result = vec3(0.0, 0.0, 0.0);
+      vec3 norm = normalize(Normal);
+      vec3 viewDir = normalize(viewPos - FragPos);
+      
+      for (int i = 0; i < NR_LIGHTS; i++){
+         // ambient
+     	    vec3 ambient = light[i].ambient * textureDiffuse;
+	    
+            // diffuse
+            vec3 lightDir = normalize(light[i].position - FragPos);
+            float diff = max(dot(norm, lightDir), 0.0);
+            vec3 diffuse = light[i].diffuse * diff * textureDiffuse;
 
-        // attenuation
-        float dist = length(light[i].position - FragPos);
-        float attenuation = 1.0 / (light[i].constantAtten + light[i].linearAtten * dist + light[i].quadraticAtten * dist * dist);
-        ambient *= attenuation;
-        diffuse *= attenuation;
-        specular *= attenuation;
+	            // specular
+        	    // vec3 reflectDir = reflect(-lightDir, norm);
+		    vec3 reflectDir = normalize(lightDir + viewDir);
+
+	    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0); // hard-coded shininess for now
+	    vec3 specular = light[i].specular * (spec * textureSpecular); // our material does not have a specular tecture yet
+
+       	     // attenuation
+       	      float dist = length(light[i].position - FragPos);
+              float attenuation = 1.0 / (light[i].constantAtten + light[i].linearAtten * dist + light[i].quadraticAtten * dist * dist);
+              ambient *= attenuation;
+              diffuse *= attenuation;
+              specular *= attenuation;
 
         // output
-        result += (ambient + diffuse + specular);
+	      result += (ambient + diffuse + specular);
+   	       }
+   	       FragColor = vec4(result, 1.0);
     }
-    FragColor = vec4(result, 1.0);
+    else
+	FragColor = texture(prevBuffer,gl_FragCoord.xy/800.0f);
 }

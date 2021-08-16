@@ -1,3 +1,4 @@
+
 #include "../include/renderer.h"
 #include "../include/model.hpp"
 #include "../include/stb_image.h"
@@ -6,9 +7,11 @@
 #include "../include/skybox.hpp"
 #include "../Maths/Matrix.hpp"
 #include "../Maths/vec.hpp"
+#include "../include/zbuffer.hpp"
 #include <GLFW/glfw3.h>
+#include <chrono>
 
-//#define NR_LIGHT_CUBES 3
+// #define NR_LIGHT_CUBES 3
 
 static Render::State state;
 
@@ -18,8 +21,8 @@ void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 
 int main() {
   auto render = Render::CreateRenderer();
-  render.shader_program =
-      ShaderProgram("./shader/model-vertex.glsl", "./shader/model-fragment.glsl");
+  render.shader_program = ShaderProgram("./shader/model-vertex.glsl", "./shader/model-fragment.glsl");
+  
   render.light_cube_shader_program = ShaderProgram("./shader/light-cube-vertex.glsl","./shader/light-cube-fragment.glsl");
   render.skybox_shader_program = ShaderProgram("./shader/skybox-vertex.glsl","./shader/skybox-fragment.glsl");
 
@@ -27,8 +30,10 @@ int main() {
 
   //Model mainModel("./models/cyborg/cyborg.obj");
   //Model mainModel("./models/rocket/rocket.obj");
-  Model mainModel("./models/rocket2/rocks.obj");
+  //  Model mainModel("./Models/cubie/cubie.obj");
+  Model mainModel("./Models/rocks/rocks.obj");
   //Model mainModel("./models/backpack/backpack.obj");
+  Model floorModel("./Models/Floor/floor.obj");
 
   FMath::Vec3<float> cube_positions[] = {
       FMath::Vec3(0.6964f,  1.666f, 0.706876f),
@@ -50,21 +55,31 @@ int main() {
     cubes[i].color = cube_colors[i];
   }
 
+  // Manual depth buffering
+  auto zrender = Render::ZRender(state.screen_width,state.screen_height);
+  auto zprogram = glCreateProgram();
+  auto zvertex  = CompileAndLogShader("./shader/zvertex.glsl",GL_VERTEX_SHADER);
+  glAttachShader(zprogram,zvertex);
+  zrender.attachDepthFragment(zprogram);
+  
+  
   const char* skybox_textures[6] = {
     "./resources/skybox/right.jpg",
     "./resources/skybox/left.jpg",
     "./resources/skybox/top.jpg",
     "./resources/skybox/bottom.jpg",
-    "./resources/skybox/front.jpg",
-    "./resources/skybox/back.jpg"
+    "./resources/skybox/back.jpg",
+    "./resources/skybox/front.jpg"
+
   };
   SkyBox skybox;
   skybox.load_skybox_textures(skybox_textures);
   glUseProgram(render.skybox_shader_program.shader_program);
   update_uniform_1i("skybox", render.skybox_shader_program.shader_program, 0);
 
-  glEnable(GL_DEPTH_TEST);
+  // glEnable(GL_DEPTH_TEST);
 
+  std::cout << "Width " << state.screen_width << " Height -> " << state.screen_height << std::endl;
   // pre-main loop optimization
   FMath::Mat4 model(1.0f), inverse_model(1.0f);
   model = model.translate({0.0f, 0.0f, 0.0f});
@@ -74,11 +89,19 @@ int main() {
 
   // projection matrix does not change for us since it is only first person view
   FMath::Mat4 projection(1.0f);
-  projection = projection.perspective(1.0f, 30.0f); // 30 degrees so 30.0f
+  projection = projection.perspective(1.0f, 30.0f,0.01f,100.0f); // 30 degrees so 30.0f
 
+  // auto project = glm::perspective(glm::radians(30.0f),1.0f,0.1f,10.0f);
+
+  glEnable(GL_CULL_FACE);
+  auto now = std::chrono::steady_clock::now();
+  auto then = now;
+  
   while (!glfwWindowShouldClose(render.window)) {
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+    zrender.clearBG(0.25f,0.25f,0.25f,1.0f);
+    zrender.clearDepth();
 
     glUseProgram(render.shader_program.shader_program);
     FMath::Mat4 view(1.0f), cube_model(1.0f);
@@ -108,44 +131,65 @@ int main() {
                         render.shader_program.shader_program, 0.44f);
     }
 
+
+    glUseProgram(render.shader_program.shader_program);
     update_uniform_matrix_4f("model", render.shader_program.shader_program, &model[0][0]);
     update_uniform_matrix_4f("inv_model", render.shader_program.shader_program, &inverse_model[0][0]);
-    update_uniform_matrix_4f("projection", render.shader_program.shader_program, &projection[0][0]);
+    update_uniform_matrix_4f("projection", render.shader_program.shader_program,projection.value_ptr());
     update_uniform_matrix_4f("view", render.shader_program.shader_program, &view[0][0]);
 
-    mainModel.draw_model(render.shader_program.shader_program);
+    
+    glUseProgram(zprogram);
+    update_uniform_matrix_4f("model", zprogram, model.value_ptr());
+    update_uniform_matrix_4f("projection", zprogram, projection.value_ptr());//projection.value_ptr());
+    update_uniform_matrix_4f("view", zprogram, view.value_ptr());
+    
+    
 
-    // light cube render
-    glUseProgram(render.light_cube_shader_program.shader_program);
-    update_uniform_matrix_4f("projection", render.light_cube_shader_program.shader_program, &projection[0][0]);
-    update_uniform_matrix_4f("view", render.light_cube_shader_program.shader_program, &view[0][0]);
 
-    // TODO: use instanced cubes
-    glBindVertexArray(cubes[0].VAO);
-    for (int i = 0; i < NR_LIGHT_CUBES; i++){
-      cube_model = FMath::Mat4<float>(1.0f);
-      cube_model = cube_model.translate(cubes[i].position);
-      cube_model = cube_model.scale(cubes[i].scale);
-
-      update_uniform_3f("cubeColor", render.light_cube_shader_program.shader_program, cubes[i].color);
-      update_uniform_matrix_4f("model", render.light_cube_shader_program.shader_program, &cube_model[0][0]);
-      glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
-
-    // skybox render
-    glDepthFunc(GL_LEQUAL);
     glUseProgram(render.skybox_shader_program.shader_program);
 
-    view = view.clip_upper_triagular_mat();
+
 
     update_uniform_matrix_4f("projection", render.skybox_shader_program.shader_program, &projection[0][0]);
     update_uniform_matrix_4f("view", render.skybox_shader_program.shader_program, &view[0][0]);
 
+    glBindFramebuffer(GL_FRAMEBUFFER,zrender.colorFBO);
     skybox.draw_skybox();
+    
+    glUseProgram(zprogram);
 
-    glDepthFunc(GL_LESS);
+    zrender.clearDepth();
+     
+    // zrender.clearDepth();
+    // // mainModel.draw_model(render.shader_program.shader_program);
+    
+    mainModel.draw_model(render.shader_program.shader_program,zprogram,zrender);
+    update_uniform_matrix_4f("model", zprogram, model.scale({5.0f,1.0f,5.0f}).value_ptr());
+    floorModel.draw_model(render.shader_program.shader_program,zprogram,zrender);
+    // // // light cube render
+    // // glUseProgram(render.light_cube_shader_program.shader_program);
+    // // update_uniform_matrix_4f("projection", render.light_cube_shader_program.shader_program, &projection[0][0]);
+    // // update_uniform_matrix_4f("view", render.light_cube_shader_program.shader_program, &view[0][0]);
+
+    // // // TODO: use instanced cubes
+    // // glBindVertexArray(cubes[0].VAO);
+    // // for (int i = 0; i < NR_LIGHT_CUBES; i++){
+    // //   cube_model = FMath::Mat4<float>(1.0f);
+    // //   cube_model = cube_model.translate(cubes[i].position);
+    // //   cube_model = cube_model.scale(cubes[i].scale);
+
+    // //   update_uniform_3f("cubeColor", render.light_cube_shader_program.shader_program, cubes[i].color);
+    // //   update_uniform_matrix_4f("model", render.light_cube_shader_program.shader_program, &cube_model[0][0]);
+    // //   glDrawArrays(GL_TRIANGLES, 0, 36);
+    // // }
+    
+    zrender.draw();
 
     handleEvents(render.window);
+    now = std::chrono::steady_clock::now();
+    // std::cout << "FPS is -> " << 1000.0f/std::chrono::duration_cast<std::chrono::milliseconds>(now-then).count() << std::endl;
+    then = now;
     glfwPollEvents();
     glfwSwapBuffers(render.window);
   }
