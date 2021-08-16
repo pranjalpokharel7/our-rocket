@@ -17,7 +17,7 @@ set (X11_GLFW  ${GLFW}/posix_thread.c  ${GLFW}/x11_window.c  ${GLFW}/x11_monitor
 include_directories(${GLFW_INCLUDE} ${GLAD_INCLUDE}) 
 if(WIN32)
 	add_executable(rocket ${SRC}/main.cpp ${SRC}/renderer.cpp ${SRC}/cube.cpp ${SRC}/skybox.cpp ${SRC}/helpers.cpp ${SRC}/model.cpp ${SRC}/mesh.cpp ${INCLUDES}/glad/src/glad.c ${COMMON_GLFW} ${WIN32_GLFW} )
-	target_link_libraries(rocket gdi32 kernel32 user32)
+	target_link_libraries(rocket gdi32 assimp kernel32 user32)
 	set (CMAKE_CXX_FLAGS "-std=c++17")
 	add_compile_definitions(_GLFW_WIN32)
 endif (WIN32)

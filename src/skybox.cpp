@@ -21,6 +21,10 @@ float skybox_vertices[] = {
 };
 
 SkyBox::SkyBox(){
+  for (int i = 0; i < sizeof(skybox_vertices)/sizeof(*skybox_vertices); ++i)
+  {
+    skybox_vertices[i] *= 50;
+  }
    setup_skybox();
 }
 
