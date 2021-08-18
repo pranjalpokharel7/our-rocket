@@ -240,18 +240,7 @@ namespace Render
     // Explicitly pass indices here .. in the same format as opengl... well lets not .. indexed buffer not different 
     void depthIndexDrawArrays(GLuint topology, int count, int offset, GLuint depthProgram)
     {
-      glBindFramebuffer(GL_FRAMEBUFFER,depthFBO);
-      // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, activeDepth, 0);
-      
-      glUseProgram(depthProgram);
-      glUniform1i(glGetUniformLocation(depthProgram,"zbuffer"),0);
-      glActiveTexture(GL_TEXTURE0);
 
-      glBindTexture(GL_TEXTURE_2D,activeDepth);
-
-      glDrawElements(GL_TRIANGLES,count,GL_UNSIGNED_INT,reinterpret_cast<void*>(offset));
-      glUseProgram(0);
-      glBindFramebuffer(GL_FRAMEBUFFER,colorFBO);
     }
 
     void post()
