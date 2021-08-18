@@ -10,6 +10,7 @@
 #include "../include/zbuffer.hpp"
 #include <GLFW/glfw3.h>
 #include <chrono>
+#include <string_view>
 
 // #define NR_LIGHT_CUBES 3
 
@@ -19,7 +20,8 @@ static void handleEvents(GLFWwindow *window);
 // Lets try without header and matching function defintion
 void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 
-int main() {
+int main(int argc, char **argv)
+{
   auto render = Render::CreateRenderer();
   render.shader_program = ShaderProgram("./shader/model-vertex.glsl", "./shader/model-fragment.glsl");
   
@@ -31,10 +33,10 @@ int main() {
   //Model mainModel("./models/cyborg/cyborg.obj");
   //Model mainModel("./models/rocket/rocket.obj");
   //  Model mainModel("./Models/cubie/cubie.obj");
-  Model mainModel("./Models/rocks/rocks.obj");
+   Model mainModel("./Models/rocks/rocks.obj");
   //Model mainModel("./models/backpack/backpack.obj");
-  Model floorModel("./Models/Floor/floor.obj");
-
+   Model floorModel("./Models/Floor/floor.obj");
+  
   FMath::Vec3<float> cube_positions[] = {
       FMath::Vec3(0.6964f,  1.666f, 0.706876f),
       FMath::Vec3(1.06075f, 1.01993f, -0.6604f),
@@ -163,9 +165,10 @@ int main() {
      
     // zrender.clearDepth();
     // // mainModel.draw_model(render.shader_program.shader_program);
-    
+
+    //  modal.draw_model(render.shader_program.shader_program,zprogram,zrender);
     mainModel.draw_model(render.shader_program.shader_program,zprogram,zrender);
-    update_uniform_matrix_4f("model", zprogram, model.scale({5.0f,1.0f,5.0f}).value_ptr());
+    // update_uniform_matrix_4f("model", zprogram, model.scale({5.0f,1.0f,5.0f}).value_ptr());
     floorModel.draw_model(render.shader_program.shader_program,zprogram,zrender);
     // // // light cube render
     // // glUseProgram(render.light_cube_shader_program.shader_program);
@@ -188,7 +191,7 @@ int main() {
 
     handleEvents(render.window);
     now = std::chrono::steady_clock::now();
-    // std::cout << "FPS is -> " << 1000.0f/std::chrono::duration_cast<std::chrono::milliseconds>(now-then).count() << std::endl;
+    std::cout << "FPS is -> " << 1000.0f/std::chrono::duration_cast<std::chrono::milliseconds>(now-then).count() << std::endl;
     then = now;
     glfwPollEvents();
     glfwSwapBuffers(render.window);
