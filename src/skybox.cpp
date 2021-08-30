@@ -70,8 +70,8 @@ void SkyBox::load_skybox_textures(const char* skybox_textures[]) {
     // TODO: remove this if branch statement?
 
     GLenum img_color_format = GL_RGB;
-    //if (nr_channels == 1) img_color_format = GL_RED;
-    //else if (nr_channels == 4) img_color_format = GL_RGBA;
+    if (nr_channels == 1) img_color_format = GL_RED;
+    else if (nr_channels == 4) img_color_format = GL_RGBA;
 
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, img_color_format, img_width,
                  img_height, 0, img_color_format, GL_UNSIGNED_BYTE, img_data);

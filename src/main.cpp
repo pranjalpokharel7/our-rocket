@@ -38,15 +38,28 @@ int main(int argc, char **argv)
    Model floorModel("./Models/Floor/floor.obj");
   
   FMath::Vec3<float> cube_positions[] = {
-      FMath::Vec3(0.6964f,  1.666f, 0.706876f),
-      FMath::Vec3(1.06075f, 1.01993f, -0.6604f),
-      FMath::Vec3(1.1641f, 1.01472f, 1.03914f),
+      //FMath::Vec3(0.6964f,  1.666f, 0.706876f),
+      //FMath::Vec3(1.06075f, 1.01993f, -0.6604f),
+      //FMath::Vec3(1.1641f, 1.01472f, 1.03914f),
+
+
+      FMath::Vec3(2.19173f, 1.93018f, 2.25142f),
+      FMath::Vec3(2.15991f, 1.89708f, -1.57857f),
+      FMath::Vec3(1.32463f, 5.01879f, 2.60398f),
+      FMath::Vec3(-0.746886f, 1.90037f, 2.15353f),
+      FMath::Vec3(-0.705121f, 1.94047f, -1.54101f)
   };
   FMath::Vec3<float> cube_colors[] = {
       //FMath::Vec3(1.0f, 1.0f, 1.0f),
-      FMath::Vec3(0.498f, 1.000f, 0.831f),
-      FMath::Vec3(0.863f, 0.078f, 0.235f),
-      FMath::Vec3(1.000f, 0.843f, 0.000f),
+      //FMath::Vec3(0.498f, 1.000f, 0.831f),
+      //FMath::Vec3(0.863f, 0.078f, 0.235f),
+      //FMath::Vec3(1.000f, 0.843f, 0.000f),
+      
+      FMath::Vec3(1.0f, 1.0f, 1.0f),
+      FMath::Vec3(1.0f, 1.0f, 1.0f),
+      FMath::Vec3(1.0f, 1.0f, 1.0f),
+      FMath::Vec3(1.0f, 1.0f, 1.0f),
+      FMath::Vec3(1.0f, 1.0f, 1.0f)
   };
   int NR_LIGHT_CUBES = sizeof(cube_positions) / (3 * sizeof(float));
 
@@ -66,13 +79,12 @@ int main(int argc, char **argv)
   
   
   const char* skybox_textures[6] = {
-    "./resources/skybox/right.jpg",
-    "./resources/skybox/left.jpg",
-    "./resources/skybox/top.jpg",
-    "./resources/skybox/bottom.jpg",
-    "./resources/skybox/back.jpg",
-    "./resources/skybox/front.jpg"
-
+    "./resources/skybox/right.png",
+    "./resources/skybox/left.png",
+    "./resources/skybox/top.png",
+    "./resources/skybox/bottom.png",
+    "./resources/skybox/back.png",
+    "./resources/skybox/front.png"
   };
   SkyBox skybox;
   skybox.load_skybox_textures(skybox_textures);
@@ -81,11 +93,11 @@ int main(int argc, char **argv)
 
   // glEnable(GL_DEPTH_TEST);
 
-  std::cout << "Width " << state.screen_width << " Height -> " << state.screen_height << std::endl;
+  //std::cout << "Width " << state.screen_width << " Height -> " << state.screen_height << std::endl;
   // pre-main loop optimization
   FMath::Mat4 model(1.0f), inverse_model(1.0f);
   model = model.translate({0.0f, 0.0f, 0.0f});
-  model = model.scale({0.1f, 0.1f, 0.1f});
+  model = model.scale({0.2f, 0.2f, 0.2f});
   inverse_model = inverse_model.model_mat_inverse(model);
   inverse_model = inverse_model.transpose();
 
@@ -191,7 +203,7 @@ int main(int argc, char **argv)
 
     handleEvents(render.window);
     now = std::chrono::steady_clock::now();
-    std::cout << "FPS is -> " << 1000.0f/std::chrono::duration_cast<std::chrono::milliseconds>(now-then).count() << std::endl;
+    //std::cout << "FPS is -> " << 1000.0f/std::chrono::duration_cast<std::chrono::milliseconds>(now-then).count() << std::endl;
     then = now;
     glfwPollEvents();
     glfwSwapBuffers(render.window);

@@ -1,5 +1,5 @@
 #version 330 core
-#define NR_LIGHTS 3 // remember to re-update this everytime you change the number of light cubes
+#define NR_LIGHTS 5 // remember to re-update this everytime you change the number of light cubes
 
 out vec4 FragColor;
 
@@ -55,7 +55,7 @@ void main(){
         	    // vec3 reflectDir = reflect(-lightDir, norm);
 		    vec3 reflectDir = normalize(lightDir + viewDir);
 
-	    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0); // hard-coded shininess for now
+	    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8.0); // hard-coded shininess for now
 	    vec3 specular = light[i].specular * (spec * textureSpecular); // our material does not have a specular tecture yet
 
        	     // attenuation
