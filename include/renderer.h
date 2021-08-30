@@ -48,8 +48,8 @@ namespace Render {
     float fovy = 45.0f;
     float yaw = 0, pitch = 0;
     double last_xpos = 0.0, last_ypos = 0;
-    int screen_width = 800;
-    int screen_height = 800;
+    int screen_width = 1000;
+    int screen_height = 1000;
 
     float delta_time = 0.f;
     float last_frame = 0.f;

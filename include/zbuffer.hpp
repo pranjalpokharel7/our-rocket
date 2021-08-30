@@ -199,8 +199,9 @@ namespace Render
       std::string fragmentShaderSource =
 	"#version 330 core\n out vec4 color;\n uniform sampler2D zbuffer;\n";
       fragmentShaderSource += "float width = " + std::to_string(width) + ";\nfloat height = " + std::to_string(height) + ";\n";
+      fragmentShaderSource += "vec2 dimension = vec2(1000.0f,1000.0f);";
       fragmentShaderSource +=
-	"void main() \n {color = texture(zbuffer, vec2(gl_FragCoord.xy/800.0f));\n float old = color.x;\n float new = pow(gl_FragCoord.z,50);\n if (new <= old)\n color = vec4(vec3(new),1.0f);\n else \n color = vec4(vec3(old),1.0f); \n}";
+	"void main() \n {color = texture(zbuffer, vec2(gl_FragCoord.xy/dimension));\n float old = color.x;\n float new = pow(gl_FragCoord.z,100);\n if (new <= old)\n color = vec4(vec3(new),1.0f);\n else \n color = vec4(vec3(old),1.0f); \n}";
 											
 									  
       // Don't know if it works .. let's see 
@@ -237,24 +238,7 @@ namespace Render
 
     }
 
-    // Explicitly pass indices here .. in the same format as opengl... well lets not .. indexed buffer not different 
-    void depthIndexDrawArrays(GLuint topology, int count, int offset, GLuint depthProgram)
-    {
 
-    }
-
-    void post()
-    {
-      
-    }
-      
-    void depthTestIndexedArrays()
-    {
-    }
-
-    // This function bind the first two sampler uniforms of colorProgram's fragment shader
-    // Namely -> "uniform sampler2D depthBuffer and uniform sampler2D prevBuffer..
-    
     void bindBuffers(GLuint colorProgram)
     {
       glUseProgram(colorProgram);
