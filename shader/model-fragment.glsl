@@ -1,5 +1,6 @@
+
 #version 330 core
-#define NR_LIGHTS 5 // remember to re-update this everytime you change the number of light cubes
+#define NR_LIGHTS 9 // remember to re-update this everytime you change the number of light cubes
 
 out vec4 FragColor;
 
@@ -27,13 +28,15 @@ uniform sampler2D texture_specular1;
 uniform sampler2D depthBuffer;
 uniform sampler2D prevBuffer;
 
+vec2 dimension = vec2(1000.0f,1000.0f);
+
 void main(){
 
-    vec4 color = texture(depthBuffer,gl_FragCoord.xy/800.0f);
+    vec4 color = texture(depthBuffer,gl_FragCoord.xy/dimension);
     float prev_depth = color.x;
-    float new_depth = pow(gl_FragCoord.z, 50);
+    float new_depth = pow(gl_FragCoord.z, 100);
 
-    if (new_depth <= prev_depth + 0.0025f )
+    if (new_depth <= prev_depth + 0.002f )
     { 
 
       vec3 textureDiffuse = texture(texture_diffuse1, TexCoords).rgb;
@@ -52,10 +55,10 @@ void main(){
             vec3 diffuse = light[i].diffuse * diff * textureDiffuse;
 
 	            // specular
-        	    // vec3 reflectDir = reflect(-lightDir, norm);
-		    vec3 reflectDir = normalize(lightDir + viewDir);
+        	   //  vec3 reflectDir = reflect(-lightDir, norm);
+		   vec3 reflectDir = normalize(lightDir + viewDir);
 
-	    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8.0); // hard-coded shininess for now
+	    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64.0); // hard-coded shininess for now
 	    vec3 specular = light[i].specular * (spec * textureSpecular); // our material does not have a specular tecture yet
 
        	     // attenuation
@@ -71,5 +74,5 @@ void main(){
    	       FragColor = vec4(result, 1.0);
     }
     else
-	FragColor = texture(prevBuffer,gl_FragCoord.xy/800.0f);
+	FragColor = texture(prevBuffer,gl_FragCoord.xy/(dimension));
 }

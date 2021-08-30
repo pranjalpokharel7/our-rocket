@@ -8,6 +8,7 @@
 #include "../Maths/Matrix.hpp"
 #include "../Maths/vec.hpp"
 #include "../include/zbuffer.hpp"
+
 #include <GLFW/glfw3.h>
 #include <chrono>
 #include <string_view>
@@ -22,7 +23,7 @@ void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 
 int main(int argc, char **argv)
 {
-  auto render = Render::CreateRenderer();
+  auto render = Render::CreateRenderer(state.screen_width,state.screen_height);
   render.shader_program = ShaderProgram("./shader/model-vertex.glsl", "./shader/model-fragment.glsl");
   
   render.light_cube_shader_program = ShaderProgram("./shader/light-cube-vertex.glsl","./shader/light-cube-fragment.glsl");
@@ -33,9 +34,9 @@ int main(int argc, char **argv)
   //Model mainModel("./models/cyborg/cyborg.obj");
   //Model mainModel("./models/rocket/rocket.obj");
   //  Model mainModel("./Models/cubie/cubie.obj");
-   Model mainModel("./Models/rocks/rocks.obj");
+   Model mainModel("./Models/Final/rocket.obj");
   //Model mainModel("./models/backpack/backpack.obj");
-   Model floorModel("./Models/Floor/floor.obj");
+   Model floorModel("./Models/Final/Floor/floor.obj");
   
   FMath::Vec3<float> cube_positions[] = {
       //FMath::Vec3(0.6964f,  1.666f, 0.706876f),
@@ -47,8 +48,16 @@ int main(int argc, char **argv)
       FMath::Vec3(2.15991f, 1.89708f, -1.57857f),
       FMath::Vec3(1.32463f, 5.01879f, 2.60398f),
       FMath::Vec3(-0.746886f, 1.90037f, 2.15353f),
-      FMath::Vec3(-0.705121f, 1.94047f, -1.54101f)
+      FMath::Vec3(-0.705121f, 1.94047f, -1.54101f),
+
+      // Lighting for four corners
+      FMath::Vec3(6.0f,0.45f,-6.0f),
+      FMath::Vec3(-6.0f,0.45f,6.0f),
+      FMath::Vec3(-6.0f,0.45f,-6.0f),
+      FMath::Vec3(6.0f,0.45f,6.0f),
   };
+
+  
   FMath::Vec3<float> cube_colors[] = {
       //FMath::Vec3(1.0f, 1.0f, 1.0f),
       //FMath::Vec3(0.498f, 1.000f, 0.831f),
@@ -56,10 +65,15 @@ int main(int argc, char **argv)
       //FMath::Vec3(1.000f, 0.843f, 0.000f),
       
       FMath::Vec3(1.0f, 1.0f, 1.0f),
+      FMath::Vec3(0.0f, 0.2f, 0.0f),
       FMath::Vec3(1.0f, 1.0f, 1.0f),
+      FMath::Vec3(1.0f, 0.0f, 0.0f),
       FMath::Vec3(1.0f, 1.0f, 1.0f),
-      FMath::Vec3(1.0f, 1.0f, 1.0f),
-      FMath::Vec3(1.0f, 1.0f, 1.0f)
+
+      FMath::Vec3(1.0f,0.0f,1.0f),
+      FMath::Vec3(1.0f,0.0f,0.0f),
+      FMath::Vec3(0.0f,0.0f,1.0f),
+      FMath::Vec3(1.0f,1.0f,0.0f)
   };
   int NR_LIGHT_CUBES = sizeof(cube_positions) / (3 * sizeof(float));
 
@@ -97,7 +111,7 @@ int main(int argc, char **argv)
   // pre-main loop optimization
   FMath::Mat4 model(1.0f), inverse_model(1.0f);
   model = model.translate({0.0f, 0.0f, 0.0f});
-  model = model.scale({0.2f, 0.2f, 0.2f});
+  model = model.scale({0.2f, 0.2f, 0.2});
   inverse_model = inverse_model.model_mat_inverse(model);
   inverse_model = inverse_model.transpose();
 
@@ -110,6 +124,21 @@ int main(int argc, char **argv)
   glEnable(GL_CULL_FACE);
   auto now = std::chrono::steady_clock::now();
   auto then = now;
+
+  FMath::Vec3<float> atten_vec[9] =
+    {
+      FMath::Vec3(1.0f,0.44f,0.35f),
+      FMath::Vec3(1.0f,0.44f,0.35f),
+      FMath::Vec3(1.0f,0.44f,0.35f),
+      FMath::Vec3(1.0f,0.44f,0.35f),
+      FMath::Vec3(1.0f,0.44f,0.35f),
+      
+      FMath::Vec3(0.1f,0.1f,0.1f),
+      FMath::Vec3(0.1f,0.1f,0.1f),
+      FMath::Vec3(0.1f,0.1f,0.1f),
+      FMath::Vec3(0.1f,0.1f,0.1f)
+    };
+      
   
   while (!glfwWindowShouldClose(render.window)) {
 
@@ -137,12 +166,20 @@ int main(int argc, char **argv)
                         specular(cubes[i].color));
 
       // TODO: maybe use default values for this one? just an optimization thought
+      // update_uniform_1f(std::string("light[" + std::to_string(i) + "].constantAtten").c_str(),
+      //                   render.shader_program.shader_program, 1.0f);
+      // update_uniform_1f(std::string("light[" + std::to_string(i) + "].linearAtten").c_str(),
+      //                   render.shader_program.shader_program, 0.35f);
+      // update_uniform_1f(std::string("light[" + std::to_string(i) + "].quadraticAtten").c_str(),
+      //                   render.shader_program.shader_program, 0.44f);
+
       update_uniform_1f(std::string("light[" + std::to_string(i) + "].constantAtten").c_str(),
-                        render.shader_program.shader_program, 1.0f);
+                        render.shader_program.shader_program, atten_vec[i].x);
       update_uniform_1f(std::string("light[" + std::to_string(i) + "].linearAtten").c_str(),
-                        render.shader_program.shader_program, 0.35f);
+                        render.shader_program.shader_program, atten_vec[i].y);
       update_uniform_1f(std::string("light[" + std::to_string(i) + "].quadraticAtten").c_str(),
-                        render.shader_program.shader_program, 0.44f);
+                        render.shader_program.shader_program, atten_vec[i].z);
+
     }
 
 
@@ -267,11 +304,11 @@ void handleEvents(GLFWwindow *window) {
 
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
     state.camera.camera_pos =
-        state.camera.camera_pos + state.camera.camera_front * state.delta_time;
+        state.camera.camera_pos + state.camera.camera_front * state.delta_time * 0.6f;
   }
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
     state.camera.camera_pos =
-        state.camera.camera_pos - state.camera.camera_front * state.delta_time;
+        state.camera.camera_pos - state.camera.camera_front * state.delta_time * 0.6f;
   }
   if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
     std::cout << state.camera.camera_pos << std::endl;
