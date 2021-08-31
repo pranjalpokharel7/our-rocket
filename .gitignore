@@ -1,7 +1,6 @@
 .ccls-cache/*
 .vscode/*
 object_files/*
-models/*
 output
 rocket
 compile_commands.json
