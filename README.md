@@ -3,6 +3,17 @@
 Modeling of Vostok 1 Rocket using Blender3D and OpenGL. Computer Graphics project for 5th semester, BCT, IOE, Pulchowk.
 
 ## How to Run
+Dependencies : 
+	- CMake (min. ver 3.10)
+	- C++17 supported Compiler
+
+- Change to the main directory 
+- Generate the makefile using CMake (use appropriate generators if necessary)
+	 ```
+   cmake CMakeLists.txt
+   make
+   ```
+- Run the executable: `rocket`
 
 ## Contributors 
 
