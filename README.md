@@ -15,6 +15,14 @@ Dependencies :
    ```
 - Run the executable: `rocket`
 
+## Output
+
+### Side View
+![Side View Model](https://raw.githubusercontent.com/pranjalpokharel7/our-rocket/main/screenshots/side-view-model.png)
+
+### Top View
+![Top View Model](https://raw.githubusercontent.com/pranjalpokharel7/our-rocket/main/screenshots/top-view-model.png)
+
 ## Contributors 
 
 Tilak Chad - PUL075BCT094 @[TilakChad](https://github.com/TilakChad)\
