@@ -1,3 +1,5 @@
-# Our Rocket
+## Our Rocket - Presentation Branch
 
-Computer Graphics project for 5th semester, BCT, IOE, Pulchowk.
+This branch contains college reports and presentations that can help understand
+the project better. Is not included on the main branch since it is not required
+to run the final code. 
